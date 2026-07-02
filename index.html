@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometria Não Euclidiana - Roteiro da Aula</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            color: #1a2332;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a2332;
+            border-bottom: 4px solid #2563eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-time {
+            background: #d97706;
+        }
+
+        .badge-resource {
+            background: #7c3aed;
+        }
+
+        .section {
+            margin: 1.8rem 0;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border-left: 5px solid #2563eb;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-left-color: #7c3aed;
+            background: #f1f5f9;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-header .step {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a2332;
+        }
+
+        .section p {
+            color: #334155;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-box {
+            background: #eff6ff;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #1e40af;
+            margin: 0.8rem 0;
+            border: 2px dashed #93c5fd;
+            font-size: 1.05rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.8rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: white;
+            background: #2563eb;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn:active {
+            transform: translateY(0px) scale(0.97);
+        }
+
+        .btn-green {
+            background: #16a34a;
+        }
+        .btn-green:hover {
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+        }
+
+        .btn-purple {
+            background: #7c3aed;
+        }
+        .btn-purple:hover {
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+        }
+
+        .btn-orange {
+            background: #d97706;
+        }
+        .btn-orange:hover {
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+        }
+
+        .btn-red {
+            background: #dc2626;
+        }
+        .btn-red:hover {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-kahoot {
+            background: #e84855;
+        }
+        .btn-kahoot:hover {
+            box-shadow: 0 4px 12px rgba(232, 72, 85, 0.25);
+        }
+
+        .btn-google {
+            background: #4285f4;
+        }
+        .btn-google:hover {
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.25);
+        }
+
+        .btn i {
+            font-style: normal;
+            font-size: 1.1rem;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .idea-box {
+            background: linear-gradient(135deg, #eff6ff, #ede9fe);
+            border-radius: 16px;
+            padding: 1.2rem 1.5rem;
+            margin-top: 0.8rem;
+            border: 2px solid #93c5fd;
+        }
+
+        .idea-box strong {
+            color: #2563eb;
+            font-size: 1.1rem;
+        }
+
+        .idea-box .highlight {
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .timer {
+            display: inline-block;
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 0.2rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .material-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .material-list .item {
+            background: #e2e8f0;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #1e293b;
+        }
+
+        .step-box {
+            background: #e8f0fe;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .step-box ol {
+            margin-left: 1.2rem;
+            margin-top: 0.3rem;
+            line-height: 1.8;
+            font-size: 0.9rem;
+        }
+
+        .conclusion-box {
+            background: #f0fdf4;
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            margin-top: 0.5rem;
+            border-left: 4px solid #16a34a;
+        }
+
+        .conclusion-box strong {
+            color: #16a34a;
+        }
+
+        .highlight-text {
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.8rem;
+            }
+            .section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <h1>🌍 Quando a reta deixa de ser a menor distância</h1>
+        <div class="subtitle">
+            Uma introdução à Geometria Não Euclidiana · 3ª série EM · Matemática
+        </div>
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <span class="badge">📚 Geometria</span>
+            <span class="badge badge-time">⏱️ 25 min</span>
+            <span class="badge badge-resource">🎯 BNCC: EM13MAT201 · EM13MAT309</span>
+        </div>
+
+        <!-- AVISO INICIAL -->
+        <div style="background: #fef3c7; border-radius: 12px; padding: 0.8rem 1.2rem; margin-bottom: 1.5rem; border-left: 4px solid #d97706;">
+            <strong>📌 Instruções:</strong> Clique em cada botão para abrir o recurso em <strong>nova aba</strong>. Acompanhe a sequência proposta.
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 1: PROBLEMATIZAÇÃO                                       -->
+        <!-- ============================================================ -->
+        <div class="section">
+            <div class="section-header">
+                <span class="step">1</span>
+                <h2>Problematização</h2>
+                <span class="timer">⏱️ 2 min</span>
+            </div>
+            <div class="question-box">
+                ❓ "Qual é a menor distância entre dois pontos?"
+            </div>
+            <p>
+                Pense na pergunta acima. Anote sua resposta.
+            </p>
+            <p>
+                <strong>Será que a resposta é sempre a mesma?</strong>
+            </p>
+            <div style="margin-top: 0.5rem;">
+                <span class="badge badge-resource">📄 Apoio</span>
+                <a href="PlanoAula.pdf" target="_blank" class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.8rem; background:transparent; color:#2563eb; border:2px solid #2563eb;">
+                    📄 PlanoAula.pdf
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 2: GOOGLE EARTH                                          -->
+        <!-- ============================================================ -->
+        <div class="section">
+            <div class="section-header">
+                <span class="step">2</span>
+                <h2>Google Earth</h2>
+                <span class="timer">⏱️ 2 min</span>
+            </div>
+            <div class="question-box">
+                ❓ "A rota do avião entre Rio de Janeiro e Melbourne é uma linha reta ou uma curva?"
+            </div>
+            <p>
+                Abra o Google Earth e observe a rota de voo.
+            </p>
+            <div class="btn-group">
+                <a href="https://earth.google.com/web/" target="_blank" class="btn btn-google">
+                    🌐 Google Earth Web
+                </a>
+            </div>
+            <div style="margin-top:0.5rem; background:#f1f5f9; border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem;">
+                <strong>💡 Dica:</strong> Use as coordenadas: <br />
+                <code>Rio: -22.9068, -43.1729</code> · <code>Melbourne: -37.8136, 144.9631</code>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 3: EXPERIMENTO                                           -->
+        <!-- ============================================================ -->
+        <div class="section">
+            <div class="section-header">
+                <span class="step">3</span>
+                <h2>Experimento: Barbante × Palito</h2>
+                <span class="timer">⏱️ 8 min</span>
+            </div>
+            <div class="question-box">
+                ❓ "Qual caminho é maior: o barbante (sobre a superfície) ou o palito (atravessando a esfera)?"
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+                <strong>📦 Materiais por dupla:</strong>
+                <div class="material-list">
+                    <span class="item">1 esfera de isopor</span>
+                    <span class="item">2 barbantes</span>
+                    <span class="item">2 palitos de churrasco</span>
+                    <span class="item">1 caneta hidrográfica</span>
+                    <span class="item">1 régua</span>
+                </div>
+            </div>
+            <div class="step-box">
+                <strong>Passo a passo:</strong>
+                <ol>
+                    <li>Marque os pontos <strong>A</strong> e <strong>B</strong> na esfera.</li>
+                    <li>Estique o barbante sobre a superfície entre A e B. Corte no comprimento exato.</li>
+                    <li>Meça o barbante sobre o <strong>palito</strong> → <strong>Geodésica</strong> = ____ cm</li>
+                    <li>Simule a "reta" que atravessa a esfera com o <strong>outro palito</strong> → <strong>Euclidiana</strong> = ____ cm</li>
+                    <li><strong>Compare:</strong> Qual é maior? Por quê?</li>
+                </ol>
+            </div>
+            <div class="conclusion-box">
+                <strong>✅ Conclusão esperada:</strong> A geodésica é <strong>maior</strong> que a reta euclidiana, porque a reta atravessa o interior da esfera.
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 4: SOCIALIZAÇÃO                                          -->
+        <!-- ============================================================ -->
+        <div class="section">
+            <div class="section-header">
+                <span class="step">4</span>
+                <h2>Socialização</h2>
+                <span class="timer">⏱️ 3 min</span>
+            </div>
+            <div class="question-box">
+                ❓ "Por que a geodésica é maior que a reta euclidiana?"
+            </div>
+            <p>
+                Cada dupla anota os resultados no quadro.
+            </p>
+            <div style="background: #f1f5f9; border-radius: 12px; padding: 0.8rem 1rem; font-family: monospace; font-size:0.9rem;">
+                | Dupla | Geodésica (cm) | Euclidiana (cm) |
+                |-------|---------------|-----------------|
+                | 1     | ...           | ...             |
+                | 2     | ...           | ...             |
+                | 3     | ...           | ...             |
+                | 4     | ...           | ...             |
+            </div>
+            <p style="margin-top: 0.8rem;">
+                <strong>Conclusão:</strong> <em>"Sobre a esfera, o caminho mais curto NÃO É a reta euclidiana que imaginamos no plano. A geodésica é o equivalente à reta, mas adaptada à curvatura."</em>
+            </p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 5: VISUALIZAÇÃO DIGITAL                                 -->
+        <!-- ============================================================ -->
+        <div class="section">
+            <div class="section-header">
+                <span class="step">5</span>
+                <h2>Visualização Digital</h2>
+                <span class="timer">⏱️ 7 min</span>
+            </div>
+            <div class="question-box">
+                ❓ "Como a geometria muda quando passamos do plano para a esfera?"
+            </div>
+
+            <div style="margin: 0.8rem 0; padding: 0.8rem 1rem; background: #eff6ff; border-radius: 12px;">
+                <strong>📱 5.1 conceito.html</strong>
+                <p style="font-size:0.9rem; margin:0.3rem 0;">Transição Plano ↔ Esfera. Compare a <span style="color:#dc2626;">reta vermelha</span> (atravessa o interior) com a <span style="color:#2563eb;">geodésica azul</span> (permanece na superfície).</p>
+                <a href="conceito.html" target="_blank" class="btn btn">
+                    🖥️ Abrir conceito.html
+                </a>
+            </div>
+
+            <div style="margin: 0.8rem 0; padding: 0.8rem 1rem; background: #f5f3ff; border-radius: 12px;">
+                <strong>📱 5.2 exp_final.html</strong>
+                <p style="font-size:0.9rem; margin:0.3rem 0;">Três experimentos visuais: <strong>antípodas</strong> (infinitas geodésicas), <strong>triângulo</strong> (soma > 180°) e <strong>sem paralelas</strong>.</p>
+                <a href="exp_final.html" target="_blank" class="btn btn-purple">
+                    🖥️ Abrir exp_final.html
+                </a>
+            </div>
+
+            <div style="margin: 0.8rem 0; padding: 0.8rem 1rem; background: #fffbeb; border-radius: 12px;">
+                <strong>📱 5.3 paralelas.html</strong>
+                <p style="font-size:0.9rem; margin:0.3rem 0;">Prova visual: <strong>Trópico é uma CURVA!</strong> Compare Equador (reta) com Trópico (curva).</p>
+                <a href="paralelas.html" target="_blank" class="btn btn-orange">
+                    🖥️ Abrir paralelas.html
+                </a>
+            </div>
+
+            <div style="background: #fef2f2; border-radius: 12px; padding: 0.6rem 1rem; margin-top: 0.5rem; border-left: 4px solid #dc2626;">
+                <strong>⚠️ Importante:</strong> Explore cada aplicação, gire as esferas e observe os fenômenos!
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 6: SÍNTESE                                               -->
+        <!-- ============================================================ -->
+        <div class="section" style="border-left-color: #7c3aed;">
+            <div class="section-header">
+                <span class="step" style="background:#7c3aed;">6</span>
+                <h2>Síntese</h2>
+                <span class="timer">⏱️ 2 min</span>
+            </div>
+
+            <div style="background: #f1f5f9; border-radius: 12px; padding: 0.8rem 1rem; margin-bottom:0.8rem;">
+                <strong>📌 Três ideias-chave:</strong>
+                <ul style="margin-left: 1.2rem; margin-top: 0.5rem; line-height: 2;">
+                    <li>Na esfera, a "reta" chama-se <span class="highlight-text">GEODÉSICA</span>.</li>
+                    <li>Na esfera, <span class="highlight-text">NÃO HÁ PARALELAS</span>.</li>
+                    <li>Na esfera, triângulos têm soma <span class="highlight-text">&gt; 180°</span>.</li>
+                </ul>
+            </div>
+
+            <div style="background: #f0fdf4; border-radius: 12px; padding: 0.8rem 1rem; border-left: 4px solid #16a34a;">
+                <strong>💬 Reflexão:</strong>
+                <em>"A Matemática não descreve apenas um único mundo; ela cria modelos para compreender diferentes mundos."</em>
+            </div>
+
+            <div style="margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.8rem;">
+                <a href="Resumo.pdf" target="_blank" class="btn btn-green">
+                    📄 Resumo.pdf
+                </a>
+                <a href="Resposta.png" target="_blank" class="btn btn-purple">
+                    🖼️ Resposta.png
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ETAPA 7: KAHOOT!                                               -->
+        <!-- ============================================================ -->
+        <div class="section" style="border-left-color: #e84855;">
+            <div class="section-header">
+                <span class="step" style="background:#e84855;">7</span>
+                <h2>Kahoot!</h2>
+                <span class="timer">⏱️ 3 min</span>
+            </div>
+            <div class="question-box">
+                🎯 "Vamos testar o que aprendemos!"
+            </div>
+            <p>
+                Acesse o link abaixo ou use o código fornecido pelo professor.
+                Responda às <strong>10 questões</strong> (7 múltipla escolha + 3 verdadeiro/falso).
+            </p>
+            <div class="btn-group">
+                <a href="https://kahoot.it/" target="_blank" class="btn btn-kahoot">
+                    🎮 Abrir Kahoot!
+                </a>
+            </div>
+            <p style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;">
+                💡 Código da sala: <strong>fornecido pelo professor</strong>
+            </p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PRODUTO FINAL                                                 -->
+        <!-- ============================================================ -->
+        <div class="section" style="border-left-color: #d97706; background: #fffbeb;">
+            <div class="section-header">
+                <span class="step" style="background:#d97706;">📝</span>
+                <h2>Produto Final</h2>
+                <span class="timer">📅 Entrega na aula seguinte</span>
+            </div>
+            <div style="margin: 0.8rem 0; padding: 1rem; background: #ffffff; border-radius: 12px; border: 2px dashed #d97706;">
+                <strong>📌 Título:</strong>
+                <em>"Por que a menor distância entre duas cidades na Terra não aparece como uma reta em um mapa plano?"</em>
+            </div>
+            <div style="background:#f8fafc; padding:0.8rem 1rem; border-radius:8px; font-size:0.9rem;">
+                <strong>Requisitos:</strong>
+                <ul style="margin-left:1.2rem; line-height:1.8; margin-top:0.3rem;">
+                    <li>Definir geodésica</li>
+                    <li>Comparar reta euclidiana × geodésica</li>
+                    <li>Incluir dados do experimento</li>
+                    <li>Utilizar argumentos matemáticos</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- RODAPÉ                                                       -->
+        <!-- ============================================================ -->
+        <div class="footer">
+            <p>📚 Geometria Não Euclidiana · 3ª série EM · Matemática</p>
+            <p style="font-size:0.75rem; margin-top:0.2rem;">
+                BNCC: EM13MAT201 · EM13MAT309 · Duração: 25 minutos
+            </p>
+            <p style="font-size:0.75rem; margin-top:0.2rem; color:#94a3b8;">
+                Clique em cada botão para abrir os recursos em nova aba.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

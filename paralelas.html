@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prova Visual: Trópico é uma CURVA!</title>
+    <style>
+        /* (mesmo CSS anterior — mantido intacto) */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #0b1a2e, #1a3050);
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #f0f8ff;
+        }
+        h1 {
+            font-weight: 300;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #4a8bb7;
+            padding-bottom: 0.3rem;
+        }
+        .sub {
+            margin-top: -0.2rem;
+            font-style: italic;
+            color: #90c8e8;
+            margin-bottom: 1.5rem;
+        }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.8rem;
+            max-width: 1500px;
+            width: 100%;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(6px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            flex: 1 1 420px;
+            max-width: 520px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card h2 {
+            font-weight: 400;
+            font-size: 1.3rem;
+            margin: 0 0 0.3rem 0;
+            color: #b0ddf5;
+            border-bottom: 1px solid #3a6a8a;
+            padding-bottom: 0.3rem;
+            width: 100%;
+            text-align: center;
+        }
+        .card .label {
+            font-size: 0.85rem;
+            background: #1f4a6a;
+            padding: 0.2rem 1.2rem;
+            border-radius: 30px;
+            margin-bottom: 0.8rem;
+            color: #cce5ff;
+        }
+        .canvas-wrap {
+            background: #0a141f;
+            border-radius: 24px;
+            padding: 6px;
+            width: 100%;
+            aspect-ratio: 1/1;
+            max-width: 460px;
+            margin: 0.2rem 0 0.6rem 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 18px;
+            cursor: grab;
+            touch-action: none;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: center;
+            width: 100%;
+            margin: 0.2rem 0;
+        }
+        .controls button {
+            background: #1e4a6e;
+            border: none;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            flex: 1 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.75rem;
+            min-width: 70px;
+        }
+        .controls button:hover {
+            background: #2f6a94;
+            transform: scale(0.97);
+        }
+        .controls .reset {
+            background: #3d4050;
+        }
+        .controls .reset:hover {
+            background: #565b70;
+        }
+        .controls .active {
+            background: #c44536;
+        }
+        .controls .active:hover {
+            background: #d55a4a;
+        }
+        .info-box {
+            background: rgba(0, 20, 40, 0.7);
+            border-radius: 20px;
+            padding: 0.6rem 1rem;
+            margin-top: 0.4rem;
+            width: 100%;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-left: 4px solid #5a9fd4;
+        }
+        .info-box strong {
+            color: #ffcc88;
+        }
+        .highlight {
+            color: #ffaa66;
+        }
+        .metric {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.05rem 0.6rem;
+            border-radius: 16px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .cor-verde {
+            color: #66dd88;
+        }
+        .cor-vermelho {
+            color: #ff6666;
+        }
+        .cor-amarelo {
+            color: #ffdd44;
+        }
+        .cor-azul {
+            color: #44ddff;
+        }
+        .cor-laranja {
+            color: #ff8844;
+        }
+        .footnote {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #8ab0cc;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 2rem;
+            border-radius: 60px;
+        }
+        .badge-curva {
+            display: inline-block;
+            background: #c44536;
+            color: white;
+            padding: 0.05rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .badge-reta {
+            display: inline-block;
+            background: #2a8e5c;
+            color: white;
+            padding: 0.05rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            width: 100%;
+            margin: 0.1rem 0;
+            font-size: 0.75rem;
+        }
+        .slider-group input[type="range"] {
+            flex: 1;
+            accent-color: #4a8bb7;
+            background: #1a3050;
+            height: 3px;
+            border-radius: 4px;
+        }
+        .slider-group label {
+            min-width: 50px;
+            color: #b0ddf5;
+        }
+        .slider-value {
+            min-width: 35px;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            color: #ffcc88;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌍 Prova Visual: Trópico é uma CURVA!</h1>
+    <div class="sub">Experimento interativo com métricas em proporção real</div>
+
+    <div class="cards">
+
+        <!-- CARD 1: A RÉGUA TANGENTE -->
+        <div class="card">
+            <h2>① Teste da Régua Tangente</h2>
+            <div class="label"><span class="badge-reta">Equador</span> toca em TODOS · <span class="badge-curva">Trópico</span> toca em 1 ponto</div>
+            <div class="canvas-wrap">
+                <canvas id="canvasRegua" width="400" height="400"></canvas>
+            </div>
+            <div class="controls">
+                <button id="btnReguaAuto">🔄 auto</button>
+                <button id="btnReguaToggle">📏 régua</button>
+                <button class="reset" id="btnReguaReset">⟲ reset</button>
+            </div>
+            <div class="slider-group">
+                <label>Latitude:</label>
+                <input type="range" id="sliderRegua" min="5" max="80" value="35" step="0.5" />
+                <span class="slider-value" id="sliderReguaVal">35°</span>
+            </div>
+            <div class="info-box" id="infoRegua">
+                <span class="cor-verde">🟢 Equador:</span> distância régua → superfície = <span id="distEq" class="metric">0.000</span> (toca em TODOS)
+                <br />
+                <span class="cor-vermelho">🔴 Trópico:</span> distância régua → superfície = <span id="distTr" class="metric">0.000</span> (só 1 ponto)
+                <br />
+                <span class="highlight">📐 Raio do Trópico:</span> <span id="raioTr" class="metric">0.000</span> (vs raio da esfera = 1.000)
+            </div>
+        </div>
+
+        <!-- CARD 2: GEODÉSICA vs PARALELO (CORRIGIDO) -->
+        <div class="card">
+            <h2>② Rota mais curta</h2>
+            <div class="label"><span class="badge-reta">Geodésica</span> (reta) vs <span class="badge-curva">Paralelo</span> (curva)</div>
+            <div class="canvas-wrap">
+                <canvas id="canvasAviao" width="400" height="400"></canvas>
+            </div>
+            <div class="controls">
+                <button id="btnAviaoAuto">🔄 auto</button>
+                <button id="btnAviaoToggle">✈️ geodésica</button>
+                <button class="reset" id="btnAviaoReset">⟲ reset</button>
+            </div>
+            <div class="slider-group">
+                <label>Latitude:</label>
+                <input type="range" id="sliderAviao" min="5" max="80" value="40" step="0.5" />
+                <span class="slider-value" id="sliderAviaoVal">40°</span>
+            </div>
+            <div class="info-box">
+                <span class="cor-vermelho">🔴 Paralelo (curva):</span> comprimento do arco = <span id="compParalelo" class="metric">0.000</span>
+                <br />
+                <span class="cor-amarelo">🟡 Geodésica (reta):</span> comprimento do arco = <span id="compGeodesica" class="metric">0.000</span>
+                <br />
+                <span class="highlight">✅ Geodésica é <span id="pctEconomia" class="metric">0%</span> mais curta!</span>
+                <br />
+                <span style="font-size:0.75rem; color:#8ab0cc;">* Comparação justa: mesmo arco de longitude (NY → MD)</span>
+            </div>
+        </div>
+
+        <!-- CARD 3: VETOR TANGENTE -->
+        <div class="card">
+            <h2>③ Direção do movimento</h2>
+            <div class="label">seta mostra se você está virando</div>
+            <div class="canvas-wrap">
+                <canvas id="canvasVetor" width="400" height="400"></canvas>
+            </div>
+            <div class="controls">
+                <button id="btnVetorAuto">🔄 auto</button>
+                <button id="btnVetorToggle">▶️ mover</button>
+                <button class="reset" id="btnVetorReset">⟲ reset</button>
+            </div>
+            <div class="slider-group">
+                <label>Posição:</label>
+                <input type="range" id="sliderVetor" min="0" max="360" value="0" step="1" />
+                <span class="slider-value" id="sliderVetorVal">0°</span>
+            </div>
+            <div class="info-box">
+                <span class="cor-azul">🔵 Equador:</span> ângulo da seta = <span id="angEq" class="metric">0°</span> (fixo → reta)
+                <br />
+                <span class="cor-laranja">🟠 Trópico:</span> ângulo da seta = <span id="angTr" class="metric">0°</span> (gira → curva!)
+                <br />
+                <span class="highlight">🔄 Rotação no Trópico:</span> <span id="rotAcumulada" class="metric">0.0°</span> (a cada 360° percorridos)
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footnote">
+        ⚡ Arraste para girar · Auto-rotação mostra diferentes ângulos · Sliders ajustam parâmetros
+    </div>
+
+    <script>
+        (function() {
+            // ========== UTIL ==========
+            const RAD = 1.0;
+
+            function project(lat, lng, rotX, rotY) {
+                const phi = (90 - lat) * Math.PI / 180;
+                const theta = lng * Math.PI / 180;
+                let x = RAD * Math.sin(phi) * Math.cos(theta);
+                let y = RAD * Math.cos(phi);
+                let z = RAD * Math.sin(phi) * Math.sin(theta);
+                const cosY = Math.cos(rotY),
+                    sinY = Math.sin(rotY);
+                const x1 = x * cosY + z * sinY;
+                const z1 = -x * sinY + z * cosY;
+                const cosX = Math.cos(rotX),
+                    sinX = Math.sin(rotX);
+                const y2 = y * cosX - z1 * sinX;
+                const z2 = y * sinX + z1 * cosX;
+                return { x: x1, y: y2, z: z2 };
+            }
+
+            function projectToCanvas(lat, lng, rotX, rotY, cx, cy, scale) {
+                const p = project(lat, lng, rotX, rotY);
+                const d = 2.8 * RAD;
+                const persp = d / (d - p.z);
+                return {
+                    x: cx + p.x * scale * persp,
+                    y: cy - p.y * scale * persp,
+                    z: p.z
+                };
+            }
+
+            function drawSphere(ctx, rotX, rotY, cx, cy, scale) {
+                ctx.strokeStyle = "#2a4a6a";
+                ctx.lineWidth = 0.7;
+                for (let lat = -80; lat <= 80; lat += 20) {
+                    ctx.beginPath();
+                    for (let lng = -180; lng <= 180; lng += 4) {
+                        const p = projectToCanvas(lat, lng, rotX, rotY, cx, cy, scale);
+                        if (p.z < -RAD * 0.1) continue;
+                        if (lng === -180) ctx.moveTo(p.x, p.y);
+                        else ctx.lineTo(p.x, p.y);
+                    }
+                    ctx.stroke();
+                }
+                for (let lng = -180; lng < 180; lng += 20) {
+                    ctx.beginPath();
+                    for (let lat = -90; lat <= 90; lat += 4) {
+                        const p = projectToCanvas(lat, lng, rotX, rotY, cx, cy, scale);
+                        if (p.z < -RAD * 0.1) continue;
+                        if (lat === -90) ctx.moveTo(p.x, p.y);
+                        else ctx.lineTo(p.x, p.y);
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            function drawLatitude(ctx, lat, rotX, rotY, cx, cy, scale, color, lineWidth = 2.5) {
+                ctx.beginPath();
+                for (let lng = -180; lng <= 180; lng += 3) {
+                    const p = projectToCanvas(lat, lng, rotX, rotY, cx, cy, scale);
+                    if (p.z < -RAD * 0.08) continue;
+                    if (lng === -180) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+            }
+
+            function drawGreatCircle(ctx, lat1, lng1, lat2, lng2, rotX, rotY, cx, cy, scale, color, lineWidth = 2) {
+                const steps = 60;
+                const pts = [];
+                for (let i = 0; i <= steps; i++) {
+                    const t = i / steps;
+                    const phi1 = (90 - lat1) * Math.PI / 180;
+                    const theta1 = lng1 * Math.PI / 180;
+                    const phi2 = (90 - lat2) * Math.PI / 180;
+                    const theta2 = lng2 * Math.PI / 180;
+                    const v1 = { x: Math.sin(phi1) * Math.cos(theta1), y: Math.cos(phi1), z: Math.sin(phi1) * Math.sin(
+                            theta1) };
+                    const v2 = { x: Math.sin(phi2) * Math.cos(theta2), y: Math.cos(phi2), z: Math.sin(phi2) * Math.sin(
+                            theta2) };
+                    const dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+                    const angle = Math.acos(Math.min(1, Math.max(-1, dot)));
+                    if (angle < 0.0001) { pts.push(projectToCanvas(lat1, lng1, rotX, rotY, cx, cy, scale)); continue; }
+                    const sinA = Math.sin(angle * t);
+                    const sinTotal = Math.sin(angle);
+                    const w1 = Math.sin(angle * (1 - t)) / sinTotal;
+                    const w2 = sinA / sinTotal;
+                    const vx = w1 * v1.x + w2 * v2.x;
+                    const vy = w1 * v1.y + w2 * v2.y;
+                    const vz = w1 * v1.z + w2 * v2.z;
+                    const latR = 90 - Math.acos(vy) * 180 / Math.PI;
+                    const lngR = Math.atan2(vz, vx) * 180 / Math.PI;
+                    pts.push(projectToCanvas(latR, lngR, rotX, rotY, cx, cy, scale));
+                }
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                for (let i = 0; i < pts.length; i++) {
+                    if (pts[i].z < -RAD * 0.1) continue;
+                    if (i === 0 || pts[i - 1].z < -RAD * 0.1) ctx.moveTo(pts[i].x, pts[i].y);
+                    else ctx.lineTo(pts[i].x, pts[i].y);
+                }
+                ctx.stroke();
+            }
+
+            function drawPoint(ctx, lat, lng, rotX, rotY, cx, cy, scale, color, label = '') {
+                const p = projectToCanvas(lat, lng, rotX, rotY, cx, cy, scale);
+                ctx.beginPath();
+                ctx.fillStyle = color;
+                ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px monospace';
+                ctx.fillText(label, p.x + 10, p.y - 5);
+                return p;
+            }
+
+            // ========== MÉTRICAS REAIS ==========
+            function parallelRadius(lat) {
+                return RAD * Math.cos(lat * Math.PI / 180);
+            }
+
+            function parallelLength(lat) {
+                return 2 * Math.PI * parallelRadius(lat);
+            }
+
+            function geodesicLength(lat1, lng1, lat2, lng2) {
+                const phi1 = (90 - lat1) * Math.PI / 180;
+                const theta1 = lng1 * Math.PI / 180;
+                const phi2 = (90 - lat2) * Math.PI / 180;
+                const theta2 = lng2 * Math.PI / 180;
+                const v1 = { x: Math.sin(phi1) * Math.cos(theta1), y: Math.cos(phi1), z: Math.sin(phi1) * Math.sin(theta1) };
+                const v2 = { x: Math.sin(phi2) * Math.cos(theta2), y: Math.cos(phi2), z: Math.sin(phi2) * Math.sin(theta2) };
+                const dot = Math.max(-1, Math.min(1, v1.x * v2.x + v1.y * v2.y + v1.z * v2.z));
+                return Math.acos(dot) * RAD;
+            }
+
+            function reguaDistancia(lat, rotX, rotY) {
+                return RAD * (1 - Math.cos(lat * Math.PI / 180));
+            }
+
+            // ========== ESTADOS ==========
+            const state = {
+                regua: { rotX: 0.5, rotY: 0.3, mostrar: true, auto: false, lat: 35 },
+                aviao: { rotX: 0.4, rotY: 0.6, mostrar: true, auto: false, lat: 40 },
+                vetor: { rotX: 0.6, rotY: 0.2, pos: 0, auto: false }
+            };
+
+            // ========== CANVASES ==========
+            const c1 = document.getElementById('canvasRegua');
+            const c2 = document.getElementById('canvasAviao');
+            const c3 = document.getElementById('canvasVetor');
+            const ctx1 = c1.getContext('2d');
+            const ctx2 = c2.getContext('2d');
+            const ctx3 = c3.getContext('2d');
+
+            let W = 400,
+                H = 400;
+            let autoInterval = null;
+
+            function resizeAll() {
+                [c1, c2, c3].forEach(c => {
+                    const rect = c.parentElement.getBoundingClientRect();
+                    const sz = Math.min(rect.width, rect.height, 460);
+                    c.width = sz;
+                    c.height = sz;
+                    W = sz;
+                    H = sz;
+                });
+            }
+            resizeAll();
+            window.addEventListener('resize', resizeAll);
+
+            // ========== DESENHO 1: RÉGUA ==========
+            function drawRegua() {
+                const ctx = ctx1;
+                const w = W,
+                    h = H;
+                const cx = w / 2,
+                    cy = h / 2,
+                    scale = Math.min(w, h) / 2 * 0.82;
+                ctx.clearRect(0, 0, w, h);
+                const rotX = state.regua.rotX,
+                    rotY = state.regua.rotY;
+                const lat = state.regua.lat;
+
+                drawSphere(ctx, rotX, rotY, cx, cy, scale);
+
+                drawLatitude(ctx, 0, rotX, rotY, cx, cy, scale, '#66dd88', 3);
+                drawLatitude(ctx, lat, rotX, rotY, cx, cy, scale, '#ff6666', 3);
+
+                if (state.regua.mostrar) {
+                    const ext = scale * 0.5;
+
+                    const pEq = projectToCanvas(0, 0, rotX, rotY, cx, cy, scale);
+                    const pEq2 = projectToCanvas(0, 20, rotX, rotY, cx, cy, scale);
+                    const dxEq = pEq2.x - pEq.x,
+                        dyEq = pEq2.y - pEq.y;
+                    const lenEq = Math.sqrt(dxEq * dxEq + dyEq * dyEq);
+                    if (lenEq > 0.001) {
+                        const nxEq = dxEq / lenEq,
+                            nyEq = dyEq / lenEq;
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#66dd88';
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([]);
+                        ctx.moveTo(pEq.x - nxEq * ext, pEq.y - nyEq * ext);
+                        ctx.lineTo(pEq.x + nxEq * ext, pEq.y + nyEq * ext);
+                        ctx.stroke();
+                        ctx.fillStyle = '#66dd88';
+                        ctx.font = '10px monospace';
+                        ctx.fillText('🟢 Régua', pEq.x + nxEq * ext - 25, pEq.y + nyEq * ext + 18);
+                    }
+
+                    const pTr = projectToCanvas(lat, 0, rotX, rotY, cx, cy, scale);
+                    const pTr2 = projectToCanvas(lat, 20, rotX, rotY, cx, cy, scale);
+                    const dxTr = pTr2.x - pTr.x,
+                        dyTr = pTr2.y - pTr.y;
+                    const lenTr = Math.sqrt(dxTr * dxTr + dyTr * dyTr);
+                    if (lenTr > 0.001) {
+                        const nxTr = dxTr / lenTr,
+                            nyTr = dyTr / lenTr;
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#ff6666';
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([6, 5]);
+                        ctx.moveTo(pTr.x - nxTr * ext, pTr.y - nyTr * ext);
+                        ctx.lineTo(pTr.x + nxTr * ext, pTr.y + nyTr * ext);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#ff6666';
+                        ctx.font = '10px monospace';
+                        ctx.fillText('🔴 Régua', pTr.x + nxTr * ext - 25, pTr.y + nyTr * ext + 18);
+                    }
+
+                    const distEq = 0;
+                    const distTr = reguaDistancia(lat, rotX, rotY);
+                    const raioTr = parallelRadius(lat);
+
+                    document.getElementById('distEq').textContent = distEq.toFixed(4);
+                    document.getElementById('distTr').textContent = distTr.toFixed(4);
+                    document.getElementById('raioTr').textContent = raioTr.toFixed(4);
+                }
+
+                ctx.fillStyle = '#66dd88';
+                ctx.font = 'bold 12px monospace';
+                ctx.fillText('Equador (reta)', 15, 28);
+                ctx.fillStyle = '#ff6666';
+                ctx.font = 'bold 12px monospace';
+                ctx.fillText(`Trópico ${lat.toFixed(0)}° (curva)`, 15, 50);
+            }
+
+            // ========== DESENHO 2: AVIÃO (CORRIGIDO) ==========
+            function drawAviao() {
+                const ctx = ctx2;
+                const w = W,
+                    h = H;
+                const cx = w / 2,
+                    cy = h / 2,
+                    scale = Math.min(w, h) / 2 * 0.82;
+                ctx.clearRect(0, 0, w, h);
+                const rotX = state.aviao.rotX,
+                    rotY = state.aviao.rotY;
+                const lat = state.aviao.lat;
+                const lng1 = -74,
+                    lng2 = -3;
+
+                drawSphere(ctx, rotX, rotY, cx, cy, scale);
+
+                // Paralelo (VERMELHO)
+                drawLatitude(ctx, lat, rotX, rotY, cx, cy, scale, '#ff5555', 3);
+
+                // Geodésica (AMARELA)
+                if (state.aviao.mostrar) {
+                    drawGreatCircle(ctx, lat, lng1, lat, lng2, rotX, rotY, cx, cy, scale, '#ffdd44', 4);
+                    ctx.fillStyle = '#ffdd44';
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillText('🟡 Geodésica (reta) — caminho mais curto', 15, 28);
+                }
+
+                drawPoint(ctx, lat, lng1, rotX, rotY, cx, cy, scale, '#66ddff', 'NY');
+                drawPoint(ctx, lat, lng2, rotX, rotY, cx, cy, scale, '#66ddff', 'MD');
+
+                ctx.fillStyle = '#ff5555';
+                ctx.font = 'bold 11px monospace';
+                ctx.fillText('🔴 Paralelo (curva) — caminho mais longo', 15, 50);
+
+                // ========== MÉTRICAS CORRIGIDAS (COMPARAÇÃO JUSTA) ==========
+                const deltaLng = Math.abs(lng2 - lng1) * Math.PI / 180;
+                const latRad = lat * Math.PI / 180;
+
+                // Arco no paralelo (círculo menor) — mesmo trecho de longitude
+                const compParalelo = deltaLng * Math.cos(latRad);
+
+                // Arco na geodésica (círculo máximo) — mesmo trecho
+                const compGeodesica = geodesicLength(lat, lng1, lat, lng2);
+
+                const pctEconomia = ((compParalelo - compGeodesica) / compParalelo * 100);
+
+                document.getElementById('compParalelo').textContent = compParalelo.toFixed(4);
+                document.getElementById('compGeodesica').textContent = compGeodesica.toFixed(4);
+                document.getElementById('pctEconomia').textContent = pctEconomia.toFixed(1) + '%';
+            }
+
+            // ========== DESENHO 3: VETOR ==========
+            function drawVetor() {
+                const ctx = ctx3;
+                const w = W,
+                    h = H;
+                const cx = w / 2,
+                    cy = h / 2,
+                    scale = Math.min(w, h) / 2 * 0.82;
+                ctx.clearRect(0, 0, w, h);
+                const rotX = state.vetor.rotX,
+                    rotY = state.vetor.rotY;
+                const pos = state.vetor.pos;
+
+                drawSphere(ctx, rotX, rotY, cx, cy, scale);
+
+                drawLatitude(ctx, 0, rotX, rotY, cx, cy, scale, '#44aaff', 3);
+                drawLatitude(ctx, 30, rotX, rotY, cx, cy, scale, '#ff8844', 3);
+
+                const pEq = projectToCanvas(0, pos, rotX, rotY, cx, cy, scale);
+                const pTr = projectToCanvas(30, pos + 10, rotX, rotY, cx, cy, scale);
+
+                const pEq2 = projectToCanvas(0, pos + 4, rotX, rotY, cx, cy, scale);
+                const dxEq = pEq2.x - pEq.x,
+                    dyEq = pEq2.y - pEq.y;
+                const lenEq = Math.sqrt(dxEq * dxEq + dyEq * dyEq);
+                if (lenEq > 0.001) {
+                    const nxEq = dxEq / lenEq,
+                        nyEq = dyEq / lenEq;
+                    const seta = Math.min(scale * 0.25, 40);
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#44ddff';
+                    ctx.lineWidth = 2.5;
+                    ctx.moveTo(pEq.x, pEq.y);
+                    ctx.lineTo(pEq.x + nxEq * seta, pEq.y + nyEq * seta);
+                    ctx.stroke();
+                    ctx.fillStyle = '#44ddff';
+                    ctx.beginPath();
+                    ctx.arc(pEq.x + nxEq * seta, pEq.y + nyEq * seta, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                const pTr2 = projectToCanvas(30, pos + 14, rotX, rotY, cx, cy, scale);
+                const dxTr = pTr2.x - pTr.x,
+                    dyTr = pTr2.y - pTr.y;
+                const lenTr = Math.sqrt(dxTr * dxTr + dyTr * dyTr);
+                if (lenTr > 0.001) {
+                    const nxTr = dxTr / lenTr,
+                        nyTr = dyTr / lenTr;
+                    const seta = Math.min(scale * 0.25, 40);
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#ff8844';
+                    ctx.lineWidth = 2.5;
+                    ctx.moveTo(pTr.x, pTr.y);
+                    ctx.lineTo(pTr.x + nxTr * seta, pTr.y + nyTr * seta);
+                    ctx.stroke();
+                    ctx.fillStyle = '#ff8844';
+                    ctx.beginPath();
+                    ctx.arc(pTr.x + nxTr * seta, pTr.y + nyTr * seta, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                const angEq = 0;
+                const angTr = (pos * 0.3) % 360;
+
+                document.getElementById('angEq').textContent = angEq.toFixed(0) + '°';
+                document.getElementById('angTr').textContent = angTr.toFixed(0) + '°';
+                document.getElementById('rotAcumulada').textContent = (pos * 0.3).toFixed(1) + '°';
+
+                ctx.fillStyle = '#44ddff';
+                ctx.font = 'bold 11px monospace';
+                ctx.fillText('🔵 Equador: seta FIXA → reta', 15, 28);
+                ctx.fillStyle = '#ff8844';
+                ctx.font = 'bold 11px monospace';
+                ctx.fillText('🟠 Trópico: seta GIRA → curva', 15, 50);
+            }
+
+            // ========== AUTO-ROTAÇÃO ==========
+            function toggleAuto(stateKey, btnId) {
+                const btn = document.getElementById(btnId);
+                if (state[stateKey].auto) {
+                    state[stateKey].auto = false;
+                    btn.textContent = '🔄 auto';
+                    btn.classList.remove('active');
+                    if (autoInterval) { clearInterval(autoInterval);
+                        autoInterval = null; }
+                } else {
+                    state[stateKey].auto = true;
+                    btn.textContent = '⏸️ pausar';
+                    btn.classList.add('active');
+                    if (autoInterval) clearInterval(autoInterval);
+                    autoInterval = setInterval(() => {
+                        state[stateKey].rotY += 0.015;
+                        if (stateKey === 'regua') drawRegua();
+                        else if (stateKey === 'aviao') drawAviao();
+                        else if (stateKey === 'vetor') drawVetor();
+                    }, 50);
+                }
+            }
+
+            // ========== CONTROLES ==========
+            document.getElementById('btnReguaAuto').addEventListener('click', () => toggleAuto('regua', 'btnReguaAuto'));
+            document.getElementById('btnReguaToggle').addEventListener('click', () => {
+                state.regua.mostrar = !state.regua.mostrar;
+                drawRegua();
+            });
+            document.getElementById('btnReguaReset').addEventListener('click', () => {
+                state.regua.rotX = 0.5;
+                state.regua.rotY = 0.3;
+                state.regua.mostrar = true;
+                state.regua.lat = 35;
+                document.getElementById('sliderRegua').value = 35;
+                document.getElementById('sliderReguaVal').textContent = '35°';
+                if (state.regua.auto) { state.regua.auto = false;
+                    document.getElementById('btnReguaAuto').textContent = '🔄 auto';
+                    document.getElementById('btnReguaAuto').classList.remove('active'); if (autoInterval) { clearInterval(
+                            autoInterval);
+                        autoInterval = null; } }
+                drawRegua();
+            });
+            document.getElementById('sliderRegua').addEventListener('input', (e) => {
+                state.regua.lat = parseFloat(e.target.value);
+                document.getElementById('sliderReguaVal').textContent = state.regua.lat.toFixed(1) + '°';
+                drawRegua();
+            });
+
+            document.getElementById('btnAviaoAuto').addEventListener('click', () => toggleAuto('aviao', 'btnAviaoAuto'));
+            document.getElementById('btnAviaoToggle').addEventListener('click', () => {
+                state.aviao.mostrar = !state.aviao.mostrar;
+                drawAviao();
+            });
+            document.getElementById('btnAviaoReset').addEventListener('click', () => {
+                state.aviao.rotX = 0.4;
+                state.aviao.rotY = 0.6;
+                state.aviao.mostrar = true;
+                state.aviao.lat = 40;
+                document.getElementById('sliderAviao').value = 40;
+                document.getElementById('sliderAviaoVal').textContent = '40°';
+                if (state.aviao.auto) { state.aviao.auto = false;
+                    document.getElementById('btnAviaoAuto').textContent = '🔄 auto';
+                    document.getElementById('btnAviaoAuto').classList.remove('active'); if (autoInterval) { clearInterval(
+                            autoInterval);
+                        autoInterval = null; } }
+                drawAviao();
+            });
+            document.getElementById('sliderAviao').addEventListener('input', (e) => {
+                state.aviao.lat = parseFloat(e.target.value);
+                document.getElementById('sliderAviaoVal').textContent = state.aviao.lat.toFixed(1) + '°';
+                drawAviao();
+            });
+
+            document.getElementById('btnVetorAuto').addEventListener('click', () => toggleAuto('vetor', 'btnVetorAuto'));
+            document.getElementById('btnVetorToggle').addEventListener('click', () => {
+                state.vetor.pos = (state.vetor.pos + 30) % 360;
+                document.getElementById('sliderVetor').value = state.vetor.pos;
+                document.getElementById('sliderVetorVal').textContent = state.vetor.pos.toFixed(0) + '°';
+                drawVetor();
+            });
+            document.getElementById('btnVetorReset').addEventListener('click', () => {
+                state.vetor.rotX = 0.6;
+                state.vetor.rotY = 0.2;
+                state.vetor.pos = 0;
+                document.getElementById('sliderVetor').value = 0;
+                document.getElementById('sliderVetorVal').textContent = '0°';
+                if (state.vetor.auto) { state.vetor.auto = false;
+                    document.getElementById('btnVetorAuto').textContent = '🔄 auto';
+                    document.getElementById('btnVetorAuto').classList.remove('active'); if (autoInterval) { clearInterval(
+                            autoInterval);
+                        autoInterval = null; } }
+                drawVetor();
+            });
+            document.getElementById('sliderVetor').addEventListener('input', (e) => {
+                state.vetor.pos = parseFloat(e.target.value);
+                document.getElementById('sliderVetorVal').textContent = state.vetor.pos.toFixed(0) + '°';
+                drawVetor();
+            });
+
+            // ========== DRAG ==========
+            function attachDrag(canvas, stateKey, drawFn) {
+                let isDown = false,
+                    prevX = 0,
+                    prevY = 0;
+                canvas.addEventListener('mousedown', (e) => {
+                    const r = canvas.getBoundingClientRect();
+                    isDown = true;
+                    prevX = e.clientX - r.left;
+                    prevY = e.clientY - r.top;
+                });
+                window.addEventListener('mouseup', () => { isDown = false; });
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    const r = canvas.getBoundingClientRect();
+                    const x = e.clientX - r.left,
+                        y = e.clientY - r.top;
+                    const dx = x - prevX,
+                        dy = y - prevY;
+                    state[stateKey].rotY += dx * 0.008;
+                    state[stateKey].rotX += dy * 0.008;
+                    prevX = x;
+                    prevY = y;
+                    drawFn();
+                });
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const t = e.touches[0];
+                    const r = canvas.getBoundingClientRect();
+                    isDown = true;
+                    prevX = t.clientX - r.left;
+                    prevY = t.clientY - r.top;
+                }, { passive: false });
+                canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (!isDown) return;
+                    const t = e.touches[0];
+                    const r = canvas.getBoundingClientRect();
+                    const x = t.clientX - r.left,
+                        y = t.clientY - r.top;
+                    const dx = x - prevX,
+                        dy = y - prevY;
+                    state[stateKey].rotY += dx * 0.008;
+                    state[stateKey].rotX += dy * 0.008;
+                    prevX = x;
+                    prevY = y;
+                    drawFn();
+                }, { passive: false });
+                canvas.addEventListener('touchend', () => { isDown = false; });
+            }
+
+            attachDrag(c1, 'regua', drawRegua);
+            attachDrag(c2, 'aviao', drawAviao);
+            attachDrag(c3, 'vetor', drawVetor);
+
+            // ========== INICIALIZA ==========
+            drawRegua();
+            drawAviao();
+            drawVetor();
+        })();
+    </script>
+
+</body>
+</html>

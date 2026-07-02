@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometria em Curvas - Layout Otimizado</title>
+
+    <style>
+        /* ========================================
+           RESET E CONFIGURAÇÕES GLOBAIS
+           ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            color: #1a2332;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ========================================
+           HEADER - MAIS COMPACTO
+           ======================================== */
+        #header {
+            background: linear-gradient(135deg, #ffffff, #e8edf5);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #4a90d9;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 50px;
+        }
+
+        #header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        #header .subtitle {
+            font-size: 12px;
+            color: #4a5568;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           CONTAINER PRINCIPAL - LAYOUT REFORMULADO
+           ======================================== */
+        #main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* ========================================
+           ÁREA 3D - MAIOR E CENTRALIZADA
+           ======================================== */
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(180deg, #e8f0fe 0%, #d4e0f0 100%);
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ========================================
+           OVERLAY DE INFORMAÇÕES - REPOSICIONADO
+           ======================================== */
+        #info-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(37, 99, 235, 0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            font-size: 12px;
+            line-height: 1.5;
+            pointer-events: none;
+            min-width: 200px;
+            max-width: 260px;
+            z-index: 5;
+        }
+
+        #info-overlay .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        #info-overlay .label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        #info-overlay .value {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .dist-euclidiana { color: #dc2626; }
+        .dist-geodesica { color: #2563eb; }
+        .dist-diff { color: #d97706; }
+
+        #info-overlay .validation-msg {
+            margin-top: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            background: rgba(100, 116, 139, 0.08);
+            color: #64748b;
+        }
+
+        #info-overlay .validation-msg.success {
+            background: rgba(22, 163, 74, 0.1);
+            color: #16a34a;
+        }
+
+        #info-overlay .validation-msg.info {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        #info-overlay .validation-msg.warning {
+            background: rgba(217, 119, 6, 0.1);
+            color: #d97706;
+        }
+
+        /* ========================================
+           PAINEL DE CONTROLE - MAIS COMPACTO
+           ======================================== */
+        #control-panel {
+            width: 320px;
+            background: #ffffff;
+            padding: 16px;
+            overflow-y: auto;
+            border-left: 2px solid #e2e8f0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: -2px 0 12px rgba(0,0,0,0.05);
+        }
+
+        #control-panel::-webkit-scrollbar {
+            width: 3px;
+        }
+        #control-panel::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        #control-panel::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+
+        /* ========================================
+           SEÇÕES DO PAINEL - MAIS COMPACTAS
+           ======================================== */
+        .panel-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+        .panel-section:hover {
+            border-color: #93c5fd;
+        }
+
+        .panel-section h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #2563eb;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-section h3 .badge {
+            font-size: 9px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* ========================================
+           SLIDER DE CURVATURA - OTIMIZADO
+           ======================================== */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .slider-container .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .slider-container .slider-header .value-display {
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .slider-container .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #94a3b8;
+            margin-top: -2px;
+            padding: 0 2px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            border: 3px solid #2563eb;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* ========================================
+           SELETORES DE CIDADES - REFORMULADOS
+           ======================================== */
+        .city-selectors {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .city-selectors .city-field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .city-selectors .city-field .city-label {
+            font-size: 9px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .city-selectors .city-field select {
+            width: 100%;
+            padding: 5px 8px;
+            padding-right: 24px;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #1e293b;
+            border: 2px solid #e2e8f0;
+            font-size: 11px;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 10px;
+        }
+
+        .city-selectors .city-field select:hover {
+            border-color: #93c5fd;
+        }
+
+        .city-selectors .city-field select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .city-selectors .arrow {
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 300;
+            padding: 0 2px;
+            align-self: center;
+            margin-top: 12px;
+        }
+
+        /* ========================================
+           BOTÕES - MAIS COMPACTOS
+           ======================================== */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .btn:active {
+            transform: translateY(0px) scale(0.97);
+        }
+
+        .btn.active {
+            background: #22c55e;
+            border-color: #2563eb;
+            color: #f3f4f6;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .btn .status-dot.on {
+            background: #22c55e;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn .status-dot.off {
+            background: #94a3b8;
+        }
+
+        /* Botão Primário */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary.active {
+            background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+        }
+
+        /* Botão Perigo (Reta) */
+        .btn-danger {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .btn-danger.active {
+            background: #fecaca;
+            border-color: #dc2626;
+            color: #991b1b;
+        }
+
+        /* Botão Sucesso (Geodésica) */
+        .btn-success {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #2563eb;
+        }
+
+        .btn-success.active {
+            background: #bfdbfe;
+            border-color: #2563eb;
+            color: #1e40af;
+        }
+
+        /* ========================================
+           CAIXA DE PERGUNTA - MAIS COMPACTA
+           ======================================== */
+        #question-box {
+            background: linear-gradient(135deg, #eff6ff, #ede9fe);
+            border: 2px solid #93c5fd;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 2px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        #question-box .question-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        #question-box .question-text .highlight {
+            color: #2563eb;
+            font-weight: 700;
+            background: rgba(37, 99, 235, 0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        #question-box .question-text .highlight-plano {
+            color: #16a34a;
+            background: rgba(22, 163, 74, 0.1);
+        }
+
+        #question-box .question-text .highlight-esfera {
+            color: #7c3aed;
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        /* ========================================
+           ANIMAÇÕES
+           ======================================== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ========================================
+           RESPONSIVIDADE
+           ======================================== */
+        @media (max-width: 1024px) {
+            #control-panel {
+                width: 280px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #main-container {
+                flex-direction: column;
+            }
+            #control-panel {
+                width: 100%;
+                height: 45vh;
+                border-left: none;
+                border-top: 2px solid #e2e8f0;
+            }
+            #canvas-container {
+                height: 55vh;
+            }
+            #info-overlay {
+                bottom: 10px;
+                left: 10px;
+                min-width: 150px;
+                max-width: 200px;
+                padding: 8px 12px;
+                font-size: 10px;
+            }
+            .city-selectors {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            .city-selectors .arrow {
+                transform: rotate(90deg);
+                margin-top: 0;
+                padding: 2px 0;
+            }
+            #header h1 {
+                font-size: 15px;
+            }
+            #header .subtitle {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #control-panel {
+                padding: 8px;
+                gap: 8px;
+            }
+            .panel-section {
+                padding: 8px 10px;
+            }
+            .btn {
+                font-size: 9px;
+                padding: 4px 6px;
+                min-width: 45px;
+            }
+            #info-overlay {
+                min-width: 120px;
+                max-width: 160px;
+                padding: 6px 10px;
+                font-size: 9px;
+            }
+            #question-box .question-text {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- ========================================
+        HEADER
+        ======================================== -->
+        <div id="header">
+            <h1>🌍 Geometria em Curvas</h1>
+            <span class="subtitle">Plano ↔ Esfera • Geometria Não Euclidiana</span>
+        </div>
+
+        <!-- ========================================
+        CONTEÚDO PRINCIPAL
+        ======================================== -->
+        <div id="main-container">
+            
+            <!-- ÁREA 3D -->
+            <div id="canvas-container">
+                <!-- Overlay de Informações -->
+                <div id="info-overlay">
+                    <div class="info-row">
+                        <span class="label">🔴 Reta (interior)</span>
+                        <span class="value dist-euclidiana" id="dist-euclidiana">0.00</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">🔵 Geodésica (superfície)</span>
+                        <span class="value dist-geodesica" id="dist-geodesica">0.00</span>
+                    </div>
+                    <div class="info-row" style="border-top:1px solid #e2e8f0; padding-top:4px; margin-top:2px;">
+                        <span class="label">📊 Diferença</span>
+                        <span class="value dist-diff" id="dist-diff">0.00</span>
+                    </div>
+                    <div class="validation-msg" id="validation-msg">
+                        ✅ A geodésica é o menor caminho
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAINEL DE CONTROLE -->
+            <div id="control-panel">
+                
+                <!-- Curvatura -->
+                <div class="panel-section">
+                    <h3>
+                        🔧 Curvatura
+                        <span class="badge" id="curvature-badge">70%</span>
+                    </h3>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span>Plano</span>
+                            <span class="value-display" id="curvature-value">70%</span>
+                            <span>Esfera</span>
+                        </div>
+                        <input type="range" id="curvature-slider" min="0" max="100" value="70" />
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cidades -->
+                <div class="panel-section">
+                    <h3>📍 Rotas</h3>
+                    <div class="city-selectors">
+                        <div class="city-field">
+                            <span class="city-label">🛫 Origem</span>
+                            <select id="city-from">
+                                <option value="sao-paulo">São Paulo</option>
+                                <option value="rio-de-janeiro" selected>Rio de Janeiro</option>
+                                <option value="nova-york">Nova York</option>
+                                <option value="londres">Londres</option>
+                                <option value="tokyo">Tóquio</option>
+                                <option value="sydney">Sydney</option>
+                                <option value="cape-town">Cidade do Cabo</option>
+                                <option value="moscow">Moscou</option>
+                            </select>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="city-field">
+                            <span class="city-label">🛬 Destino</span>
+                            <select id="city-to">
+                                <option value="sao-paulo">São Paulo</option>
+                                <option value="rio-de-janeiro">Rio de Janeiro</option>
+                                <option value="nova-york">Nova York</option>
+                                <option value="londres" selected>Londres</option>
+                                <option value="tokyo">Tóquio</option>
+                                <option value="sydney">Sydney</option>
+                                <option value="cape-town">Cidade do Cabo</option>
+                                <option value="moscow">Moscou</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles Visuais -->
+                <div class="panel-section">
+                    <h3>🎮 Visuais</h3>
+                    <div class="button-group">
+                        <button class="btn btn-success active" id="btn-geodesic">
+                            <span class="status-dot on" id="dot-geodesic"></span>
+                            🌐 Geodésica
+                        </button>
+                        <button class="btn btn-danger active" id="btn-euclidean">
+                            <span class="status-dot on" id="dot-euclidean"></span>
+                            📏 Reta
+                        </button>
+                    </div>
+                    <div class="button-group" style="margin-top:4px;">
+                        <button class="btn" id="btn-equator">🌍 Equador</button>
+                        <button class="btn" id="btn-meridians">🗺️ Meridianos</button>
+                        <button class="btn active" id="btn-grid">📐 Grade</button>
+                    </div>
+                    <div class="button-group" style="margin-top:4px;">
+                        <button class="btn btn-primary active" id="btn-auto-rotate">🔄 Girar</button>
+                        <button class="btn" id="btn-reset-view">🎯 Reset</button>
+                        <button class="btn" id="btn-fullscreen">⛶ Tela Cheia</button>
+                    </div>
+                </div>
+
+                <!-- Pergunta Disparadora -->
+                <div id="question-box">
+                    <div class="question-text" id="question-text">
+                        💡 Por que a <span class="highlight">rota do avião</span> parece fazer uma <span class="highlight">curva</span> no mapa?
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+    THREE.JS IMPORTS
+    ======================================== -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <!-- ========================================
+    SCRIPT PRINCIPAL
+    ======================================== -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ========================================
+        // 1. CONFIGURAÇÕES INICIAIS
+        // ========================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe8f0fe);
+
+        const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.set(4.5, 2.8, 5.5);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: false
+        });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 2.0;
+        controls.maxDistance = 12;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // ========================================
+        // 2. ILUMINAÇÃO
+        // ========================================
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        mainLight.position.set(5, 8, 5);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0x88bbff, 0.5);
+        fillLight.position.set(-3, -2, -4);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        rimLight.position.set(-2, 4, -5);
+        scene.add(rimLight);
+
+        // ========================================
+        // 3. SUPERFÍCIE - PROPORÇÃO MANTIDA
+        // ========================================
+        const SEGMENTS = 64;
+        const RADIUS = 2.0;
+        let curvature = 0.7;
+
+        // Criar geometria base com malha quadrada
+        const baseGeometry = new THREE.PlaneGeometry(RADIUS * 2.2, RADIUS * 2.2, SEGMENTS, SEGMENTS);
+        const pos = baseGeometry.attributes.position;
+        const vertexCount = pos.count;
+
+        // Pré-calcular posições
+        const origX = new Float32Array(vertexCount);
+        const origY = new Float32Array(vertexCount);
+        const sphereX = new Float32Array(vertexCount);
+        const sphereY = new Float32Array(vertexCount);
+        const sphereZ = new Float32Array(vertexCount);
+
+        for (let i = 0; i < vertexCount; i++) {
+            const ix = i * 3;
+            const x = pos.array[ix];
+            const y = pos.array[ix + 1];
+            origX[i] = x;
+            origY[i] = y;
+
+            const dist = Math.sqrt(x * x + y * y);
+            const maxDist = RADIUS * 1.1;
+            const clampedDist = Math.min(dist, maxDist);
+            const scale = clampedDist / (maxDist || 1);
+
+            const sphereR = RADIUS * scale;
+            const angle = Math.asin(sphereR / RADIUS);
+            const zSphere = RADIUS * Math.cos(angle);
+
+            sphereX[i] = x * (sphereR / (clampedDist || 1));
+            sphereY[i] = y * (sphereR / (clampedDist || 1));
+            sphereZ[i] = zSphere - RADIUS * 0.1;
+        }
+
+        const surfaceGeometry = new THREE.BufferGeometry();
+        surfaceGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos.array), 3));
+        surfaceGeometry.setIndex(baseGeometry.index);
+        surfaceGeometry.computeVertexNormals();
+
+        const surfaceMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x3b82f6,
+            metalness: 0.05,
+            roughness: 0.3,
+            transparent: true,
+            opacity: 0.75,
+            wireframe: false,
+            side: THREE.DoubleSide,
+            envMapIntensity: 0.3,
+            clearcoat: 0.05,
+        });
+
+        const surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
+        surface.castShadow = true;
+        surface.receiveShadow = true;
+        scene.add(surface);
+
+        // Grade
+        const gridHelper = new THREE.GridHelper(RADIUS * 2.3, 12, 0x2563eb, 0x94a3b8);
+        gridHelper.position.y = -0.01;
+        scene.add(gridHelper);
+
+        // ========================================
+        // 4. FUNÇÃO DE ATUALIZAÇÃO DA SUPERFÍCIE
+        // ========================================
+        function updateSurface(curvatureVal) {
+            curvature = Math.max(0, Math.min(1, curvatureVal));
+            const posAttr = surface.geometry.attributes.position;
+            const array = posAttr.array;
+
+            for (let i = 0; i < vertexCount; i++) {
+                const ix = i * 3;
+                const x = origX[i];
+                const y = origY[i];
+
+                const flatZ = 0;
+                const sphereZVal = sphereZ[i];
+                const z = (1 - curvature) * flatZ + curvature * sphereZVal;
+
+                const flatX = x;
+                const flatY = y;
+                const spX = sphereX[i];
+                const spY = sphereY[i];
+
+                array[ix] = (1 - curvature) * flatX + curvature * spX;
+                array[ix + 1] = (1 - curvature) * flatY + curvature * spY;
+                array[ix + 2] = z;
+            }
+
+            posAttr.needsUpdate = true;
+            surface.geometry.computeVertexNormals();
+            gridHelper.visible = (curvature < 0.3);
+
+            // Atualizar badge
+            const badge = document.getElementById('curvature-badge');
+            const pct = Math.round(curvature * 100);
+            badge.textContent = pct + '%';
+            if (curvature < 0.05) {
+                badge.style.color = '#16a34a';
+                badge.style.background = 'rgba(22, 163, 74, 0.1)';
+            } else if (curvature < 0.45) {
+                badge.style.color = '#d97706';
+                badge.style.background = 'rgba(217, 119, 6, 0.1)';
+            } else {
+                badge.style.color = '#7c3aed';
+                badge.style.background = 'rgba(124, 58, 237, 0.1)';
+            }
+        }
+
+        // ========================================
+        // 5. CIDADES
+        // ========================================
+        const cityData = {
+            'sao-paulo': { lat: -23.55, lon: -46.63, name: 'São Paulo' },
+            'rio-de-janeiro': { lat: -22.91, lon: -43.20, name: 'Rio de Janeiro' },
+            'nova-york': { lat: 40.71, lon: -74.01, name: 'Nova York' },
+            'londres': { lat: 51.51, lon: -0.13, name: 'Londres' },
+            'tokyo': { lat: 35.68, lon: 139.69, name: 'Tóquio' },
+            'sydney': { lat: -33.87, lon: 151.21, name: 'Sydney' },
+            'cape-town': { lat: -33.92, lon: 18.42, name: 'Cidade do Cabo' },
+            'moscow': { lat: 55.76, lon: 37.62, name: 'Moscou' },
+        };
+
+        function latLonToPosition(lat, lon, radius) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = lon * Math.PI / 180;
+            return new THREE.Vector3(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+
+        function getCityPosition(cityKey, radius) {
+            const data = cityData[cityKey];
+            if (!data) return new THREE.Vector3(0, radius, 0);
+            return latLonToPosition(data.lat, data.lon, radius);
+        }
+
+        const markerGroup = new THREE.Group();
+        scene.add(markerGroup);
+
+        function createMarker(position, color) {
+            const group = new THREE.Group();
+
+            const sphereGeo = new THREE.SphereGeometry(0.07, 16, 16);
+            const sphereMat = new THREE.MeshPhysicalMaterial({
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.2,
+                metalness: 0.2,
+                roughness: 0.2,
+            });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            sphere.position.copy(position);
+            group.add(sphere);
+
+            const glowGeo = new THREE.SphereGeometry(0.13, 16, 16);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.1,
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.copy(position);
+            group.add(glow);
+
+            const ringGeo = new THREE.RingGeometry(0.10, 0.16, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide,
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(position);
+            ring.lookAt(position.clone().multiplyScalar(2));
+            group.add(ring);
+
+            return group;
+        }
+
+        let markerFrom = null;
+        let markerTo = null;
+        let pathGroup = new THREE.Group();
+        scene.add(pathGroup);
+
+        // ========================================
+        // 6. ESTADOS DOS BOTÕES
+        // ========================================
+        let showGeodesic = true;
+        let showEuclidean = true;
+        let showEquator = false;
+        let showMeridians = false;
+        let showGrid = true;
+
+        // ========================================
+        // 7. FUNÇÃO DE GEODÉSICA
+        // ========================================
+        function calculateGeodesic(p1, p2, radius, numPoints = 60) {
+            if (curvature < 0.01) {
+                const points = [];
+                for (let i = 0; i <= numPoints; i++) {
+                    const t = i / numPoints;
+                    const p = new THREE.Vector3().lerpVectors(p1, p2, t);
+                    points.push(p);
+                }
+                return points;
+            }
+
+            const points = [];
+            const v1 = p1.clone().normalize();
+            const v2 = p2.clone().normalize();
+
+            const angle = Math.acos(Math.max(-1, Math.min(1, v1.dot(v2))));
+
+            if (angle < 0.001) {
+                for (let i = 0; i <= numPoints; i++) {
+                    const t = i / numPoints;
+                    const p = new THREE.Vector3().lerpVectors(p1, p2, t);
+                    p.multiplyScalar(radius / p.length());
+                    points.push(p);
+                }
+                return points;
+            }
+
+            const axis = new THREE.Vector3().crossVectors(v1, v2).normalize();
+
+            for (let i = 0; i <= numPoints; i++) {
+                const t = i / numPoints;
+                const theta = t * angle;
+                const q = new THREE.Vector3().copy(v1).applyAxisAngle(axis, theta);
+                q.multiplyScalar(radius);
+                points.push(q);
+            }
+
+            return points;
+        }
+
+        // ========================================
+        // 8. ATUALIZAR CAMINHOS
+        // ========================================
+        function updatePaths() {
+            // Limpar caminhos
+            while (pathGroup.children.length > 0) {
+                const child = pathGroup.children[0];
+                pathGroup.remove(child);
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) child.material.dispose();
+            }
+
+            const fromKey = document.getElementById('city-from').value;
+            const toKey = document.getElementById('city-to').value;
+
+            const effectiveRadius = RADIUS * (0.6 + 0.4 * curvature);
+            const p1 = getCityPosition(fromKey, effectiveRadius);
+            const p2 = getCityPosition(toKey, effectiveRadius);
+
+            // Marcadores
+            markerGroup.children.forEach(child => markerGroup.remove(child));
+
+            if (markerFrom) {
+                markerGroup.remove(markerFrom);
+                markerFrom = null;
+            }
+            if (markerTo) {
+                markerGroup.remove(markerTo);
+                markerTo = null;
+            }
+
+            markerFrom = createMarker(p1, 0x2563eb);
+            markerTo = createMarker(p2, 0xdc2626);
+            markerGroup.add(markerFrom);
+            markerGroup.add(markerTo);
+
+            // --- RETA EUCLIDIANA ---
+            if (showEuclidean) {
+                const numPoints = 30;
+                const points = [];
+                for (let i = 0; i <= numPoints; i++) {
+                    const t = i / numPoints;
+                    const p = new THREE.Vector3().lerpVectors(p1, p2, t);
+                    points.push(p);
+                }
+
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0xdc2626,
+                    transparent: true,
+                    opacity: 0.85,
+                });
+                const line = new THREE.Line(geometry, material);
+                pathGroup.add(line);
+
+                // Pontos de destaque
+                const dotGeo = new THREE.SphereGeometry(0.025, 6, 6);
+                const dotMat = new THREE.MeshBasicMaterial({ 
+                    color: 0xdc2626,
+                    transparent: true,
+                    opacity: 0.4,
+                });
+                for (let i = 0; i < points.length; i += 5) {
+                    const dot = new THREE.Mesh(dotGeo, dotMat);
+                    dot.position.copy(points[i]);
+                    pathGroup.add(dot);
+                }
+            }
+
+            // --- GEODÉSICA ---
+            if (showGeodesic) {
+                let geodesicPoints;
+                if (curvature < 0.01) {
+                    geodesicPoints = [];
+                    const numPoints = 30;
+                    for (let i = 0; i <= numPoints; i++) {
+                        const t = i / numPoints;
+                        const p = new THREE.Vector3().lerpVectors(p1, p2, t);
+                        geodesicPoints.push(p);
+                    }
+                } else {
+                    geodesicPoints = calculateGeodesic(p1, p2, effectiveRadius, 60);
+                }
+
+                const geometry = new THREE.BufferGeometry().setFromPoints(geodesicPoints);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0x2563eb,
+                    transparent: true,
+                    opacity: 0.9,
+                });
+                const line = new THREE.Line(geometry, material);
+                pathGroup.add(line);
+
+                const dotGeo = new THREE.SphereGeometry(0.03, 6, 6);
+                const dotMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+                for (let i = 0; i < geodesicPoints.length; i += 5) {
+                    const dot = new THREE.Mesh(dotGeo, dotMat);
+                    dot.position.copy(geodesicPoints[i]);
+                    pathGroup.add(dot);
+                }
+            }
+
+            // --- EQUADOR ---
+            if (showEquator) {
+                const points = [];
+                const segments = 48;
+                for (let i = 0; i <= segments; i++) {
+                    const theta = (i / segments) * Math.PI * 2;
+                    const r = effectiveRadius * 1.005;
+                    points.push(new THREE.Vector3(
+                        r * Math.cos(theta),
+                        0,
+                        r * Math.sin(theta)
+                    ));
+                }
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0xf59e0b,
+                    transparent: true,
+                    opacity: 0.5,
+                });
+                const line = new THREE.Line(geometry, material);
+                pathGroup.add(line);
+            }
+
+            // --- MERIDIANOS ---
+            if (showMeridians) {
+                const numMeridians = 8;
+                for (let j = 0; j < numMeridians; j++) {
+                    const lon = (j / numMeridians) * Math.PI * 2;
+                    const points = [];
+                    const segments = 24;
+                    for (let i = 0; i <= segments; i++) {
+                        const lat = (i / segments) * Math.PI - Math.PI / 2;
+                        const r = effectiveRadius * 1.005;
+                        points.push(new THREE.Vector3(
+                            r * Math.cos(lat) * Math.cos(lon),
+                            r * Math.sin(lat),
+                            r * Math.cos(lat) * Math.sin(lon)
+                        ));
+                    }
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const material = new THREE.LineBasicMaterial({
+                        color: 0x60a5fa,
+                        transparent: true,
+                        opacity: 0.2 + 0.08 * (j % 2),
+                    });
+                    const line = new THREE.Line(geometry, material);
+                    pathGroup.add(line);
+                }
+            }
+
+            updateDistances(p1, p2, effectiveRadius);
+            updateQuestion();
+        }
+
+        // ========================================
+        // 9. CÁLCULO DE DISTÂNCIAS
+        // ========================================
+        function updateDistances(p1, p2, radius) {
+            const distEuclid = p1.distanceTo(p2);
+
+            let distGeod;
+            if (curvature < 0.01) {
+                distGeod = distEuclid;
+            } else {
+                const v1 = p1.clone().normalize();
+                const v2 = p2.clone().normalize();
+                const angle = Math.acos(Math.max(-1, Math.min(1, v1.dot(v2))));
+                distGeod = radius * angle;
+            }
+
+            const diff = distEuclid - distGeod;
+            
+            document.getElementById('dist-euclidiana').textContent = distEuclid.toFixed(2);
+            document.getElementById('dist-geodesica').textContent = distGeod.toFixed(2);
+            
+            const diffElement = document.getElementById('dist-diff');
+            const validationMsg = document.getElementById('validation-msg');
+            
+            diffElement.textContent = diff.toFixed(2);
+            
+            if (curvature < 0.01) {
+                diffElement.style.color = '#16a34a';
+                validationMsg.textContent = '✅ No plano, reta = geodésica';
+                validationMsg.className = 'validation-msg success';
+            } else if (diff < 0) {
+                diffElement.style.color = '#dc2626';
+                validationMsg.textContent = '🌍 Geodésica é o menor caminho na superfície';
+                validationMsg.className = 'validation-msg info';
+            } else {
+                diffElement.style.color = '#d97706';
+                validationMsg.textContent = '✅ Geodésica é o menor caminho';
+                validationMsg.className = 'validation-msg';
+            }
+        }
+
+        // ========================================
+        // 10. PERGUNTA DISPARADORA
+        // ========================================
+        function updateQuestion() {
+            const box = document.getElementById('question-text');
+            const from = document.getElementById('city-from');
+            const to = document.getElementById('city-to');
+            const fromName = cityData[from.value]?.name || 'Origem';
+            const toName = cityData[to.value]?.name || 'Destino';
+
+            const distEuclid = parseFloat(document.getElementById('dist-euclidiana').textContent);
+            const distGeod = parseFloat(document.getElementById('dist-geodesica').textContent);
+
+            if (curvature < 0.01) {
+                box.innerHTML =
+                    `📐 Em um <span class="highlight highlight-plano">espaço plano</span>, a menor distância entre ${fromName} e ${toName} é uma <span class="highlight highlight-plano">linha reta</span> (${distEuclid.toFixed(2)}).`;
+            } else if (curvature < 0.3) {
+                box.innerHTML =
+                    `🌀 A curvatura começa a <span class="highlight">curvar</span> o espaço... A reta (${distEuclid.toFixed(2)}) e a geodésica (${distGeod.toFixed(2)}) se <span class="highlight">diferenciam</span>.`;
+            } else if (curvature < 0.7) {
+                const diff = (distGeod - distEuclid);
+                box.innerHTML =
+                    `📈 Na <span class="highlight">esfera</span>, a geodésica (${distGeod.toFixed(2)}) é <span class="highlight">${diff.toFixed(2)}</span> maior que a reta (${distEuclid.toFixed(2)}).`;
+            } else {
+                box.innerHTML =
+                    `✈️ Um <span class="highlight">avião</span> de ${fromName} para ${toName} segue a <span class="highlight">geodésica</span> (${distGeod.toFixed(2)}), o caminho mais curto sobre a Terra, não a reta (${distEuclid.toFixed(2)}) que atravessaria o planeta!`;
+            }
+        }
+
+        // ========================================
+        // 11. EVENTOS DOS CONTROLES
+        // ========================================
+        
+        // Slider
+        document.getElementById('curvature-slider').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) / 100;
+            const display = document.getElementById('curvature-value');
+            display.textContent = Math.round(val * 100) + '%';
+            display.style.color = val < 0.3 ? '#16a34a' : val < 0.7 ? '#d97706' : '#7c3aed';
+            updateSurface(val);
+            updatePaths();
+        });
+
+        // Cidades
+        document.getElementById('city-from').addEventListener('change', updatePaths);
+        document.getElementById('city-to').addEventListener('change', updatePaths);
+
+        // Botões
+        document.getElementById('btn-geodesic').addEventListener('click', function() {
+            showGeodesic = !showGeodesic;
+            this.classList.toggle('active');
+            document.getElementById('dot-geodesic').className = 'status-dot ' + (showGeodesic ? 'on' : 'off');
+            updatePaths();
+        });
+
+        document.getElementById('btn-euclidean').addEventListener('click', function() {
+            showEuclidean = !showEuclidean;
+            this.classList.toggle('active');
+            document.getElementById('dot-euclidean').className = 'status-dot ' + (showEuclidean ? 'on' : 'off');
+            updatePaths();
+        });
+
+        document.getElementById('btn-equator').addEventListener('click', function() {
+            showEquator = !showEquator;
+            this.classList.toggle('active');
+            updatePaths();
+        });
+
+        document.getElementById('btn-meridians').addEventListener('click', function() {
+            showMeridians = !showMeridians;
+            this.classList.toggle('active');
+            updatePaths();
+        });
+
+        document.getElementById('btn-grid').addEventListener('click', function() {
+            showGrid = !showGrid;
+            this.classList.toggle('active');
+            gridHelper.visible = showGrid;
+        });
+
+        document.getElementById('btn-auto-rotate').addEventListener('click', function() {
+            controls.autoRotate = !controls.autoRotate;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('btn-reset-view').addEventListener('click', () => {
+            camera.position.set(4.5, 2.8, 5.5);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        });
+
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // ========================================
+        // 12. RESPONSIVIDADE
+        // ========================================
+        function resizeRenderer() {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        window.addEventListener('resize', resizeRenderer);
+
+        // ========================================
+        // 13. LOOP DE ANIMAÇÃO
+        // ========================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+            
+            markerGroup.children.forEach(child => {
+                if (child.children && child.children.length > 0) {
+                    child.children.forEach(grandChild => {
+                        if (grandChild.isMesh && grandChild.geometry.type === 'RingGeometry') {
+                            grandChild.rotation.x = time * 0.5;
+                            grandChild.material.opacity = 0.2 + 0.2 * Math.sin(time * 1.5);
+                        }
+                        if (grandChild.isMesh && grandChild.geometry.type === 'SphereGeometry' &&
+                            grandChild.material.opacity === 0.1) {
+                            grandChild.scale.setScalar(1 + 0.2 * Math.sin(time * 2));
+                        }
+                    });
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ========================================
+        // 14. INICIALIZAÇÃO
+        // ========================================
+        const initialCurvature = 0.7;
+        document.getElementById('curvature-slider').value = initialCurvature * 100;
+        document.getElementById('curvature-value').textContent = Math.round(initialCurvature * 100) + '%';
+        updateSurface(initialCurvature);
+
+        document.getElementById('city-from').value = 'rio-de-janeiro';
+        document.getElementById('city-to').value = 'londres';
+        updatePaths();
+
+        animate();
+
+        controls.autoRotate = true;
+        document.getElementById('btn-auto-rotate').classList.add('active');
+
+        console.log('🌍 Geometria em Curvas - Layout Otimizado!');
+    </script>
+
+</body>
+</html>
